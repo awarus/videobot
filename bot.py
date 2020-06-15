@@ -7,7 +7,7 @@ import config
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)  # Outputs debug messages to console.
 
-bot = telebot.TeleBot(config.token, threaded=True)
+bot = telebot.TeleBot(config.token)
 
 ### Функция проверки авторизации
 # def autor(chatid):
@@ -28,17 +28,17 @@ bot = telebot.TeleBot(config.token, threaded=True)
 #                    user))
 
 ### Функция проверки режима
-def checkmode():
-    try:
-        mode_file = open("mode.txt", "r")
-        modestring = mode_file.read()
-        mode_file.close()
-        if modestring == '1':
-            return True
-        else:
-            return False
-    except:
-        return False
+#def checkmode():
+#    try:
+#        mode_file = open("mode.txt", "r")
+#        modestring = mode_file.read()
+#        mode_file.close()
+#        if modestring == '1':
+#            return True
+#        else:
+#            return False
+#    except:
+#        return False
 
 print(str(datetime.datetime.now()) + ' ' + 'Bot has woke up!')
 
@@ -62,25 +62,14 @@ def menu(message):
         markup.row('/Обновить')
         bot.send_message(message.chat.id, 'Тебе сюда нельзя. Твой ID: ' + str(message.chat.id), reply_markup=markup)
 
-### Смена режима
-@bot.message_handler(commands=['Охрана'])
-def toggle(message):
-    if autor(message.chat.id):
-        try:
-            if checkmode():
-                last_file = open("mode.txt", "w")
-                last_file.write('0')
-                last_file.close()
-                sendall('Пользователь ' + message.chat.first_name + ' выключил режим охраны')
-            else:
-                last_file = open("mode.txt", "w")
-                last_file.write('1')
-                last_file.close()
-                sendall('Пользователь ' + message.chat.first_name + ' включил режим охраны')
-        except:
-            bot.send_message(message.chat.id, 'Ошибка смены режима')
-            print(str(datetime.datetime.now()) + ' ' + "Ошибка смены режима")
-        menu(message)
+@bot.message_handler(content_types=['text', 'photo'])
+def get_text_messages(message):
+    if message.text == "Привет":
+        bot.send_message(message.from_user.id, "Привет, чем я могу тебе помочь?")
+    elif message.text == "/help":
+        bot.send_message(message.from_user.id, "Напиши привет")
+    else:
+        bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /help.")
 
 if __name__ == '__main__':
-    bot.polling(none_stop=False)
+    bot.polling(none_stop=True, interval=10)
