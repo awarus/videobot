@@ -3,6 +3,9 @@ from telebot import types
 import logging
 import datetime
 import config
+from telebot import apihelper
+
+apihelper.proxy = {'http':'http://15.236.206.6:80'}
 
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)  # Outputs debug messages to console.

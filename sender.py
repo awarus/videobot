@@ -4,9 +4,7 @@ import os
 import time
 import telebot
 import config
-from telebot import apihelper
-
-apihelper.proxy = {'http':'http://15.236.206.6:80'}
+import keyboard
 
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)  # Outputs debug messages to console.
@@ -33,13 +31,11 @@ tosendfull = []
 
 ## Функция массовой пассылки фотографий
 def sendall(filename):
-    for username in config.users:
-        try:
-            f = open(filename, 'rb')
-            bot.send_photo(username, f)
-        except:
-            print(
-                str(datetime.datetime.now()) + ' ' + 'Ошибка отправки файла ' + filename + ' пользователю ' + username)
+    try:
+        f = open(filename, 'rb')
+        bot.send_photo(-352142595, f) 
+    except:
+        print(str(datetime.datetime.now()) + ' ' + 'Ошибка отправки файла ' + filename + ' пользователю ' + username)
 
 ## Функция записи последнего обработтанного файла
 def writeproc(filename):
@@ -62,50 +58,61 @@ def readproc():
     except:
         return -1
 
+while(1):
+    if keyboard.is_pressed('q'):
+        print('q is pressed. Terminating...')
+        break;
 ## Читаем последний обработанный файл
-processed = readproc()
-if processed == -1:
-    print(str(datetime.datetime.now()) + ' ' + 'Не Удалось прочитать последний обработанный файл. Выходим')
-    quit(2)
+    #processed = readproc()
+    #if processed == -1:
+    #    print(str(datetime.datetime.now()) + ' ' + 'Не Удалось прочитать последний обработанный файл. Выходим')
+    #    quit(2)
 
-## Читаем список файлов
-files = os.listdir(config.motiondir)
-files = filter(lambda x: x.endswith('.jpg'), files)
+    ## Читаем список файлов
+    files = os.listdir(config.motiondir)
+    files = filter(lambda x: x.endswith('.png'), files)
 
 ## Очищаем список от снапшотов и расширений, сортируем
-for file in files:
-    if ('snapshot' in file) or ('last' in file) or ('-' in file):
-        pass
-    else:
-        clearfile = file[:-4]
-        clearfiles.append(clearfile)
-        clearfiles.sort()
-
-## Выбираем список необработанных файлов
-for file in clearfiles:
-    if int(file) > int(processed):
-        tosend.append(file)
-
-### Если есть что отправлять:
-if len(tosend) > 0:
-    try:
-        if writeproc(tosend[-1]) == False:
-            print(str(datetime.datetime.now()) + ' ' + 'Ошибка записи последнего элемента. Выходим!')
-            quit(2)
+    for file in files:
+        print(file + '/')
+        if ('processed_' in file) or ('last' in file) or ('-' in file):
+            pass
         else:
-            print(str(datetime.datetime.now()) + ' ' + 'Последний элемент записан успешно')
+            clearfile = file[:-4]
+            clearfiles.append(clearfile)
+            clearfiles.sort()
+
+    ## Выбираем список необработанных файлов
+    for file in clearfiles:
+        if ('processed_' in file):
+            pass
+        else:
+            print(file)
+            tosend.append(file)
+
+    ### Если есть что отправлять:
+    if len(tosend) > 0:
+        try:
+            if writeproc(tosend[-1]) == False:
+                print(str(datetime.datetime.now()) + ' ' + 'Ошибка записи последнего элемента. Выходим!')
+                quit(2)
+            else:
+                print(str(datetime.datetime.now()) + ' ' + 'Последний элемент записан успешно')
         ### Отправляем только если успешно записали последний - иначе будет бесконечная отправка
         ## Потом формируем список фалов с полным именем
-        for filename in tosend:
-            fullname = config.motiondir + '/' + filename + '.jpg'
-            tosendfull.append(fullname)
-        ## Потом отправляем неторопливо
-        for filename in tosendfull:
-            sendall(filename)
-            time.sleep(1)
-        else:
-            print(str(datetime.datetime.now()) + ' ' + 'Режим отправки выключен')
-    except:
-        print(str(datetime.datetime.now()) + ' ' + 'Ошибка отправки')
-else:
-    print(str(datetime.datetime.now()) + ' ' + 'Нечего отправлять')
+            for filename in tosend:
+                fullname = config.motiondir + filename + '.png'
+                tosendfull.append(fullname)
+            ## Потом отправляем
+            for filename in tosendfull:
+                print(filename)
+                sendall(filename)
+                os.rename(fullname, fullname + 'processed_')
+                time.sleep(1)
+                print('2')
+            else:
+                print(str(datetime.datetime.now()) + ' ' + 'Режим отправки выключен')
+        except:
+            print(str(datetime.datetime.now()) + ' ' + 'Ошибка отправки')
+    #else:
+    #    print(str(datetime.datetime.now()) + ' ' + 'Нечего отправлять')
