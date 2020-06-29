@@ -33,11 +33,11 @@ tosendfull = []
 def sendall(filename):
     try:
         f = open(filename, 'rb')
-        bot.send_photo(-352142595, f) 
+        bot.send_photo(-352142595, f)
     except:
         print(str(datetime.datetime.now()) + ' ' + 'Ошибка отправки файла ' + filename + ' пользователю ' + username)
 
-## Функция записи последнего обработтанного файла
+## Функция записи последнего обработанного файла
 def writeproc(filename):
     try:
         last_file = open("last.txt", "w")
@@ -61,7 +61,7 @@ def readproc():
 while(1):
     if keyboard.is_pressed('q'):
         print('q is pressed. Terminating...')
-        break;
+        break
 ## Читаем последний обработанный файл
     #processed = readproc()
     #if processed == -1:
@@ -74,21 +74,22 @@ while(1):
 
 ## Очищаем список от снапшотов и расширений, сортируем
     for file in files:
-        print(file + '/')
         if ('processed_' in file) or ('last' in file) or ('-' in file):
-            pass
+            continue
         else:
+            print(file + '/')
             clearfile = file[:-4]
-            clearfiles.append(clearfile)
-            clearfiles.sort()
+#            clearfiles.append(clearfile)
+            tosend.append(clearfile)
+#            clearfiles.sort()
 
     ## Выбираем список необработанных файлов
-    for file in clearfiles:
-        if ('processed_' in file):
-            pass
-        else:
-            print(file)
-            tosend.append(file)
+ #   for file in clearfiles:
+ #       if ('processed_' in file):
+ #           continue
+ #       else:
+ #           print(file)
+ #           tosend.append(file)
 
     ### Если есть что отправлять:
     if len(tosend) > 0:
@@ -103,10 +104,12 @@ while(1):
             for filename in tosend:
                 fullname = config.motiondir + filename + '.png'
                 tosendfull.append(fullname)
+                tosend.remove(filename)
             ## Потом отправляем
             for filename in tosendfull:
                 print(filename)
                 sendall(filename)
+                tosendfull.remove(filename)
                 os.rename(fullname, fullname + 'processed_')
                 time.sleep(1)
                 print('2')
