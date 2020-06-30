@@ -59,6 +59,10 @@ def readproc():
         return -1
 
 while(1):
+    clearfiles = []
+    tosend = []
+    tosendfull = []
+
     if keyboard.is_pressed('q'):
         print('q is pressed. Terminating...')
         break
@@ -79,17 +83,18 @@ while(1):
         else:
             print(file + '/')
             clearfile = file[:-4]
-#            clearfiles.append(clearfile)
-            tosend.append(clearfile)
-#            clearfiles.sort()
+            clearfiles.append(clearfile)
+            #tosend.append(clearfile)
+            clearfiles.sort()
 
     ## Выбираем список необработанных файлов
- #   for file in clearfiles:
- #       if ('processed_' in file):
- #           continue
- #       else:
- #           print(file)
- #           tosend.append(file)
+    for file in clearfiles:
+        if ('processed_' in file):
+            continue
+        else:
+            print(file)
+            tosend.append(file)
+            clearfiles.remove(file)
 
     ### Если есть что отправлять:
     if len(tosend) > 0:
